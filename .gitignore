@@ -1,0 +1,45 @@
+
+# ------------------------------------------
+# 1. .NET / C# / Visual Studio / Rider
+# ------------------------------------------
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+
+# Sealed and user-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider / IntelliJ global IDE settings
+.idea/
+*.sln.iml
+
+# VS Code settings and extractor 
+.vscode/.extractor/
+.vscode/settings.json 
+
+# .NET Core / Web Tools
+_backup/
+.paket/
+absolute/
+App_Data/
+clientsecrets.json
+
+# appsettings and secrets files
+!appsettings.json
+!appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+secrets.json
+.secrets
+
+
+
