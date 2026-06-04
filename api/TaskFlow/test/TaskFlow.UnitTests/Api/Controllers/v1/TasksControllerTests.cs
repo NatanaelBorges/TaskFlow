@@ -49,13 +49,15 @@ public sealed class TasksControllerTests
         _linker.GetLinks(Arg.Any<TaskResponse>(), Arg.Any<string>())
             .Returns(new Dictionary<string, LinkResponse>());
     }
-    
+
     [Theory]
     [InlineData("active",    TaskItemStatus.Active)]
     [InlineData("ACTIVE",    TaskItemStatus.Active)]
     [InlineData("Active",    TaskItemStatus.Active)]
     [InlineData("completed", TaskItemStatus.Completed)]
     [InlineData("COMPLETED", TaskItemStatus.Completed)]
+    [InlineData("0",         TaskItemStatus.Active)]
+    [InlineData("1",         TaskItemStatus.Completed)]
     public async Task GetAll_KnownStatusString_PassesCorrectFilterToHandler(
         string statusParam, TaskItemStatus expectedEnum)
     {
@@ -67,7 +69,7 @@ public sealed class TasksControllerTests
             Arg.Is<GetAll.Query>(q => q.StatusFilter == expectedEnum),
             Arg.Any<CancellationToken>());
     }
-    
+
     [Theory]
     [InlineData("all")]
     [InlineData("unknown")]
@@ -83,7 +85,7 @@ public sealed class TasksControllerTests
             Arg.Is<GetAll.Query>(q => q.StatusFilter == null),
             Arg.Any<CancellationToken>());
     }
-    
+
     [Theory]
     [InlineData(0,   1)]
     [InlineData(-5,  1)]
@@ -99,8 +101,7 @@ public sealed class TasksControllerTests
             Arg.Is<GetAll.Query>(q => q.Page == expectedPage),
             Arg.Any<CancellationToken>());
     }
-    
-    
+
     [Theory]
     [InlineData(0,   1)]
     [InlineData(101, 100)]
@@ -115,7 +116,7 @@ public sealed class TasksControllerTests
             Arg.Is<GetAll.Query>(q => q.PageSize == expectedSize),
             Arg.Any<CancellationToken>());
     }
-    
+
     [Fact]
     public async Task Update_NotFound_Returns404()
     {
@@ -167,7 +168,7 @@ public sealed class TasksControllerTests
         var problem = Assert.IsType<ObjectResult>(result);
         Assert.Equal(StatusCodes.Status404NotFound, problem.StatusCode);
     }
-    
+
     [Fact]
     public async Task GetById_TaskExists_Returns200WithLinkedResponse()
     {
@@ -224,7 +225,6 @@ public sealed class TasksControllerTests
         Assert.Equal(StatusCodes.Status400BadRequest, problem.StatusCode);
     }
 
-
     [Fact]
     public async Task Delete_TaskExists_Returns204NoContent()
     {
@@ -249,15 +249,15 @@ public sealed class TasksControllerTests
         var problem = Assert.IsType<ObjectResult>(result);
         Assert.Equal(StatusCodes.Status404NotFound, problem.StatusCode);
     }
-    
-    // --- Helpers 
+
+    // --- Helpers ---
 
     private void SetupGetAllReturnsEmpty()
     {
         _getAll.HandleAsync(Arg.Any<GetAll.Query>(), Arg.Any<CancellationToken>())
             .Returns(new PagedResult<TaskResponse>(Array.Empty<TaskResponse>(), 1, 10, 0));
     }
-    
+
     private static TaskResponse MakeTaskResponse(Guid id, TaskItemStatus status) => new()
     {
         Id = id, Title = "Task", Description = "", Status = status,
