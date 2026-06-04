@@ -1,59 +1,114 @@
-# TaskFlow
+# TaskFlow — Frontend (Web)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.0.
+[← Back to project overview](../../README.md)
 
-## Development server
+Angular 22 SPA with Signals-based state management and Tailwind CSS. Communicates with the [TaskFlow API](../../api/TaskFlow/README.md).
 
-To start a local development server, run:
+---
 
-```bash
-ng serve
-```
+## Table of Contents
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- [Prerequisites](#prerequisites)
+- [Running Locally](#running-locally)
+- [Running the Tests](#running-the-tests)
+- [Building for Production](#building-for-production)
 
-## Code scaffolding
+---
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Prerequisites
 
-```bash
-ng generate component component-name
-```
+| Tool | Version | Download |
+| --- | --- | --- |
+| Node.js | **22 or later** | <https://nodejs.org/en/download> |
+| npm | **11 or later** _(bundled with Node 22)_ | — |
+| Git | Any recent | <https://git-scm.com> |
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+Verify your installation:
 
 ```bash
-ng build
+node --version
+# Expected: v22.x.x
+
+npm --version
+# Expected: 11.x.x
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+> **No global Angular CLI required** — the project uses the version pinned in `devDependencies` and all scripts run through `npm run`.
 
-## Running unit tests
+---
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Running Locally
+
+> The API must be running before starting the frontend. See [api/TaskFlow/README.md](../../api/TaskFlow/README.md).
 
 ```bash
-ng test
+# 1. Navigate to the Angular workspace
+cd web/task-flow
+
+# 2. Install dependencies (first time or after package.json changes)
+npm install
+
+# 3. Start the development server
+npm start
 ```
 
-## Running end-to-end tests
+The app is served at `http://localhost:4200` and reloads automatically on file changes.
 
-For end-to-end (e2e) testing, run:
+### Environment configuration
+
+The dev build points to the API via `src/environments/environment.ts`:
+
+```typescript
+export const environment = {
+  production: false,
+  apiUrl: 'https://localhost:7045',
+};
+```
+
+No changes are needed for local development. If the API runs on a different port, update `apiUrl` here.
+
+---
+
+## Running the Tests
+
+The project uses **Vitest 4** as the test runner with **jsdom** as the DOM environment.
 
 ```bash
-ng e2e
+# From the Angular workspace
+cd web/task-flow
+
+# Install dependencies if you have not already
+npm install
+
+# Run tests once (CI mode)
+npm test
+
+# Run tests in watch mode (re-runs on file changes)
+npx ng test --watch
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### What is covered
 
-## Additional Resources
+| Area | Test file |
+| --- | --- |
+| `Task` model mapping functions | `task.model.spec.ts` |
+| `TaskService` signal-based state | `task.service.spec.ts` |
+| Root `AppComponent` bootstrap | `app.spec.ts` |
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+---
+
+## Building for Production
+
+```bash
+npm run build
+```
+
+Output is written to `dist/task-flow/`. To serve the SSR bundle:
+
+```bash
+npm run serve:ssr:task-flow
+```
+
+---
+
+[← Back to project overview](../../README.md)
