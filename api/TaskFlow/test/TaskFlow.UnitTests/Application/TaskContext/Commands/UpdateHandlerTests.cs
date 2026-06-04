@@ -21,18 +21,33 @@ public sealed class UpdateHandlerTests
     }
 
     [Fact]
-    public async Task HandleAsync_ExistingTask_ReturnsSuccessWithUpdatedValues()
+    public async Task HandleAsync_ExistingTask_ReturnsSuccessWithUpdatedTitleAndDescription()
     {
         var id = Guid.NewGuid();
         var existing = TaskItem.Create(TaskTitle.FromTrustedSource("Old Title"), "old desc");
         _repository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(existing);
         _repository.UpdateAsync(existing, Arg.Any<CancellationToken>()).Returns(existing);
 
-        var result = await _handler.HandleAsync(new Command(id, "New Title", "new desc", TaskItemStatus.Completed));
+        var result = await _handler.HandleAsync(new Command(id, "New Title", "new desc"));
 
         Assert.True(result.IsSuccess);
         Assert.Equal("New Title", result.Value!.Title);
-        Assert.Equal(TaskItemStatus.Completed, result.Value.Status);
+        Assert.Equal("new desc", result.Value.Description);
+    }
+
+    [Fact]
+    public async Task HandleAsync_ExistingTask_DoesNotChangeStatus()
+    {
+        var id = Guid.NewGuid();
+        var existing = TaskItem.Create(TaskTitle.FromTrustedSource("Title"), "desc");
+        existing.Complete();
+        _repository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(existing);
+        _repository.UpdateAsync(existing, Arg.Any<CancellationToken>()).Returns(existing);
+
+        var result = await _handler.HandleAsync(new Command(id, "New Title", "desc"));
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(TaskItemStatus.Completed, result.Value!.Status);
     }
 
     [Fact]
@@ -43,7 +58,7 @@ public sealed class UpdateHandlerTests
         _repository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns(existing);
         _repository.UpdateAsync(existing, Arg.Any<CancellationToken>()).Returns(existing);
 
-        await _handler.HandleAsync(new Command(id, "New Title", "desc", TaskItemStatus.Active));
+        await _handler.HandleAsync(new Command(id, "New Title", "desc"));
 
         await _repository.Received(1).UpdateAsync(existing, Arg.Any<CancellationToken>());
     }
@@ -54,7 +69,7 @@ public sealed class UpdateHandlerTests
         var id = Guid.NewGuid();
         _repository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns((TaskItem?)null);
 
-        var result = await _handler.HandleAsync(new Command(id, "Title", "desc", TaskItemStatus.Active));
+        var result = await _handler.HandleAsync(new Command(id, "Title", "desc"));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(ResultErrorType.NotFound, result.ErrorType);
@@ -66,7 +81,7 @@ public sealed class UpdateHandlerTests
         var id = Guid.NewGuid();
         _repository.GetByIdAsync(id, Arg.Any<CancellationToken>()).Returns((TaskItem?)null);
 
-        await _handler.HandleAsync(new Command(id, "Title", "desc", TaskItemStatus.Active));
+        await _handler.HandleAsync(new Command(id, "Title", "desc"));
 
         await _repository.DidNotReceive().UpdateAsync(Arg.Any<TaskItem>(), Arg.Any<CancellationToken>());
     }
@@ -76,7 +91,7 @@ public sealed class UpdateHandlerTests
     [InlineData("   ")]
     public async Task HandleAsync_InvalidTitle_ReturnsValidationError(string title)
     {
-        var result = await _handler.HandleAsync(new Command(Guid.NewGuid(), title, "desc", TaskItemStatus.Active));
+        var result = await _handler.HandleAsync(new Command(Guid.NewGuid(), title, "desc"));
 
         Assert.False(result.IsSuccess);
         Assert.Equal(ResultErrorType.Validation, result.ErrorType);
@@ -85,7 +100,7 @@ public sealed class UpdateHandlerTests
     [Fact]
     public async Task HandleAsync_InvalidTitle_DoesNotQueryRepository()
     {
-        await _handler.HandleAsync(new Command(Guid.NewGuid(), "", "desc", TaskItemStatus.Active));
+        await _handler.HandleAsync(new Command(Guid.NewGuid(), "", "desc"));
 
         await _repository.DidNotReceive().GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }

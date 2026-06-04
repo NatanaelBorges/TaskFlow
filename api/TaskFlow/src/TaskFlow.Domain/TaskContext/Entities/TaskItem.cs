@@ -19,11 +19,10 @@ public sealed class TaskItem : Entity
         Status = TaskItemStatus.Active
     };
 
-    public void Update(TaskTitle title, string description, TaskItemStatus status)
+    public void Update(TaskTitle title, string description)
     {
         Title = title;
         Description = description.Trim();
-        Status = status;
         UpdatedAtUtc = DateTime.UtcNow;
     }
 

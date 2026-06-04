@@ -12,6 +12,4 @@ public sealed record Request
 
     [MaxLength(2000, ErrorMessage = "Description must not exceed 2000 characters.")]
     public string Description { get; init; } = string.Empty;
-
-    public TaskItemStatus Status { get; init; }
 }

@@ -43,12 +43,13 @@ public sealed class TasksController(
         page     = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
-        TaskItemStatus? statusFilter = status?.ToLowerInvariant() switch
+        TaskItemStatus? statusFilter = null;
+        if (status is not null
+            && Enum.TryParse<TaskItemStatus>(status, ignoreCase: true, out var parsed)
+            && Enum.IsDefined(parsed))
         {
-            "active"    => TaskItemStatus.Active,
-            "completed" => TaskItemStatus.Completed,
-            _           => null
-        };
+            statusFilter = parsed;
+        }
 
         var result = await getAll.HandleAsync(new GetAll.Query(statusFilter, page, pageSize), ct);
 
@@ -98,7 +99,7 @@ public sealed class TasksController(
     public async Task<IActionResult> Update(Guid id, [FromBody] Update.Request request, CancellationToken ct)
     {
         var result = await update.HandleAsync(
-            new Update.Command(id, request.Title, request.Description, request.Status), ct);
+            new Update.Command(id, request.Title, request.Description), ct);
         return ToActionResult(result);
     }
 

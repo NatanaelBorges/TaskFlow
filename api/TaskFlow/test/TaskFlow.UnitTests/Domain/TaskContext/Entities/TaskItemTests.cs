@@ -108,16 +108,15 @@ public sealed class TaskItemTests
     }
 
     [Fact]
-    public void Update_SetsNewValuesAndTimestamp()
+    public void Update_SetsNewTitleAndDescriptionAndTimestamp()
     {
         var task = TaskItem.Create(ValidTitle, "old description");
         var newTitle = TaskTitle.FromTrustedSource("New Title");
 
-        task.Update(newTitle, " updated desc ", TaskItemStatus.Completed);
+        task.Update(newTitle, " updated desc ");
 
         Assert.Equal("New Title", task.Title.Value);
         Assert.Equal("updated desc", task.Description);
-        Assert.Equal(TaskItemStatus.Completed, task.Status);
         Assert.NotNull(task.UpdatedAtUtc);
     }
 

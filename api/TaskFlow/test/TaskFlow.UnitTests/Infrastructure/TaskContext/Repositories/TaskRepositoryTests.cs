@@ -146,13 +146,13 @@ public sealed class TaskRepositoryTests : IDisposable
     public async Task UpdateAsync_PersistsChanges()
     {
         var task = await _repository.AddAsync(NewTask("Original"));
-        task.Update(TaskTitle.FromTrustedSource("Updated"), "new desc", TaskItemStatus.Completed);
+        task.Update(TaskTitle.FromTrustedSource("Updated"), "new desc");
 
         await _repository.UpdateAsync(task);
 
         var fetched = await _repository.GetByIdAsync(task.Id);
         Assert.Equal("Updated", fetched!.Title.Value);
-        Assert.Equal(TaskItemStatus.Completed, fetched.Status);
+        Assert.Equal("new desc", fetched.Description);
     }
 
     // --- Helpers ---

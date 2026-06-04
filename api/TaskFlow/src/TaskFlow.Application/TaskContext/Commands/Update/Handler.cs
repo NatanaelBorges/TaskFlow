@@ -26,7 +26,7 @@ public sealed class Handler(
             return Result<TaskResponse>.NotFound($"Task '{command.Id}' was not found.");
         }
 
-        task.Update(titleResult.Value!, command.Description, command.Status);
+        task.Update(titleResult.Value!, command.Description);
         await repository.UpdateAsync(task, ct);
         return Result<TaskResponse>.Success(MapToResponse(task));
     }
